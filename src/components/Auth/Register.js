@@ -9,6 +9,7 @@ import {
   Icon
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import md5 from "md5";
 import firebase from "../../config/firebase";
 
 export default class Register extends Component {
@@ -18,7 +19,8 @@ export default class Register extends Component {
     password: "",
     passwordConfirmation: "",
     errors: [],
-    loading: false
+    loading: false,
+    usersRef: firebase.database().ref("users")
   };
 
   handleChange = event => {
@@ -68,24 +70,50 @@ export default class Register extends Component {
 
   handleSubmit = event => {
     event.preventDefault();
-
     if (this.isFormValid(this.state)) {
       this.setState({ loading: true, errors: [] });
       firebase
         .auth()
         .createUserWithEmailAndPassword(this.state.email, this.state.password)
         .then(createdUser => {
-          this.setState({ loading: false });
-          console.log(createdUser);
+          // this.setState({ loading: false });
+          console.log(createdUser.user);
+          createdUser.user
+            .updateProfile({
+              displayName: this.state.username,
+              photoURL: `http://gravatar.com/avatar/${md5(
+                createdUser.user.email
+              )}?d=identicon`
+            })
+            .then(() => {
+              this.saveUser(createdUser).then(() => {
+                console.log("User saved.");
+              });
+              this.setState({ loading: false });
+            })
+            .catch(err => {
+              console.error(err);
+              this.setState({
+                errors: this.state.errors.concat(err),
+                loading: false
+              });
+            });
         })
         .catch(err => {
-          console.log(err);
+          console.error(err);
           this.setState({
             loading: false,
             errors: this.state.errors.concat(err)
           });
         });
     }
+  };
+
+  saveUser = createdUser => {
+    return this.state.usersRef.child(createdUser.user.uid).set({
+      name: createdUser.user.displayName,
+      avatar: createdUser.user.photoURL
+    });
   };
 
   handleInputError = (errors, name) => {
@@ -106,7 +134,7 @@ export default class Register extends Component {
     return (
       <Grid textAlign="center" verticalAlign="middle" className="app">
         <Grid.Column style={{ maxWidth: 450 }}>
-          <Header as="h2" icon color="orange" textAlign="center">
+          <Header as="h1" icon color="orange" textAlign="center">
             <Icon name="puzzle piece" color="orange" />
             Register for Chat
           </Header>
