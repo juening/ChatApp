@@ -77,7 +77,7 @@ export default class Register extends Component {
         .createUserWithEmailAndPassword(this.state.email, this.state.password)
         .then(createdUser => {
           // this.setState({ loading: false });
-          console.log(createdUser.user);
+          //console.log(createdUser.user);
           createdUser.user
             .updateProfile({
               displayName: this.state.username,
@@ -92,7 +92,7 @@ export default class Register extends Component {
               this.setState({ loading: false });
             })
             .catch(err => {
-              console.error(err);
+              //console.error(err);
               this.setState({
                 errors: this.state.errors.concat(err),
                 loading: false
@@ -100,7 +100,7 @@ export default class Register extends Component {
             });
         })
         .catch(err => {
-          console.error(err);
+          //console.error(err);
           this.setState({
             loading: false,
             errors: this.state.errors.concat(err)
