@@ -19,7 +19,7 @@ import Spinner from "./Spinner";
 import "semantic-ui-css/semantic.min.css";
 
 import rootReducers from "./reducers/";
-import { setUser } from "./actions";
+import { setUser, clearUser } from "./actions";
 
 import registerServiceWorker from "./registerServiceWorker";
 
@@ -27,11 +27,13 @@ const store = createStore(rootReducers, composeWithDevTools());
 
 class Root extends React.Component {
   componentDidMount() {
-    console.log(this.props.isLoading);
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.props.setUser(user);
         this.props.history.push("/");
+      } else {
+        this.props.history.push("/login");
+        this.props.clearUser();
       }
     });
   }
@@ -56,7 +58,7 @@ const mapStateToProps = state => ({
 const RootWithAuth = withRouter(
   connect(
     mapStateToProps,
-    { setUser }
+    { setUser, clearUser }
   )(Root)
 );
 
