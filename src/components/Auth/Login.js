@@ -118,7 +118,7 @@ export default class Login extends Component {
             </Message>
           )}
           <Message>
-            Don't have an account? <Link to="/login">Login</Link>
+            Don't have an account? <Link to="/register">Register</Link>
           </Message>
         </Grid.Column>
       </Grid>

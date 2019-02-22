@@ -81,7 +81,7 @@ export default class Register extends Component {
           createdUser.user
             .updateProfile({
               displayName: this.state.username,
-              photoURL: `http://gravatar.com/avatar/${md5(
+              photoURL: `http://www.gravatar.com/avatar/${md5(
                 createdUser.user.email
               )}?d=identicon`
             })
