@@ -27,7 +27,9 @@ class Channels extends Component {
     if (this.state.firstLoad && this.state.channels.length > 0) {
       this.props.setCurrentChannel(this.state.channels[0]);
       this.setActiveChannel(this.state.channels[0]);
+      // console.log("called set first channel", this.state.channels);
     }
+
     this.setState({ firstLoad: false });
   };
 
@@ -52,7 +54,7 @@ class Channels extends Component {
 
   addChannel = () => {
     const { channelsRef, channelName, channelDetails } = this.state;
-    const { displayName, photoUrl } = this.props.currentUser;
+    const { displayName, photoURL } = this.props.currentUser;
     const key = channelsRef.push().key;
 
     const newChannel = {
@@ -61,7 +63,7 @@ class Channels extends Component {
       details: channelDetails,
       createdBy: {
         name: displayName,
-        avatar: photoUrl
+        avatar: photoURL
       }
     };
 
