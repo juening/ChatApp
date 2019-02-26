@@ -4,13 +4,18 @@ import { Segment, Button, Input } from "semantic-ui-react";
 
 import firebase from "../../config/firebase";
 import FileModal from "./FileModal";
+import ProgressBar from "./ProgressBar";
 
 export default class MessageForm extends Component {
   state = {
+    storageRef: firebase.storage().ref(),
     message: "",
     loading: false,
     errors: [],
-    modal: false
+    modal: false,
+    uploadState: "",
+    uploadTask: null,
+    percentUploaded: 0
   };
 
   closeModal = () => this.setState({ modal: false });
@@ -23,16 +28,21 @@ export default class MessageForm extends Component {
     });
   };
 
-  createMessage = () => {
+  createMessage = (fileUrl = null) => {
     const message = {
       timestamp: firebase.database.ServerValue.TIMESTAMP,
-      content: this.state.message,
       user: {
         id: this.props.currentUser.uid,
         name: this.props.currentUser.name,
         avatar: this.props.currentUser.photoURL
       }
     };
+
+    if (fileUrl !== null) {
+      message["image"] = fileUrl;
+    } else {
+      message["content"] = this.state.message;
+    }
     return JSON.parse(JSON.stringify(message));
   };
 
@@ -64,11 +74,71 @@ export default class MessageForm extends Component {
   };
 
   uploadFile = (file, metadata) => {
-    console.log(file, metadata);
+    const pathToUpload = this.props.currentChannel.id;
+    const ref = this.props.messagesRef;
+    const filePath = `chat/public/${uuidv4()}.jpg`;
+    this.setState(
+      {
+        uploadState: "uploading",
+        uploadTask: this.state.storageRef.child(filePath).put(file, metadata)
+      },
+      () => {
+        this.state.uploadTask.on(
+          "state_changed",
+          snap => {
+            const percentUploaded = Math.round(
+              (snap.bytesTransferred / snap.totalBytes) * 100
+            );
+            this.setState({ percentUploaded });
+          },
+          err => {
+            console.error(err);
+            this.setState({
+              errors: this.state.errors.comcat(err),
+              uploadState: "error",
+              uploadTask: null
+            });
+          },
+          () => {
+            this.state.uploadTask.snapshot.ref
+              .getDownloadURL()
+              .then(downloadUrl => {
+                this.sendFileMessage(downloadUrl, ref, pathToUpload);
+              })
+              .catch(err => {
+                console.error(err);
+                this.setState({
+                  errors: this.state.errors.comcat(err),
+                  uploadState: "error",
+                  uploadTask: null
+                });
+              });
+          }
+        );
+      }
+    );
+  };
+
+  sendFileMessage = (fileUrl, ref, pathToUpload) => {
+    ref
+      .child(pathToUpload)
+      .push()
+      .set(this.createMessage(fileUrl))
+      .then(() => {
+        this.setState({ uploadState: "done" });
+      })
+      .catch(err => {
+        console.error(err);
+        this.setState({
+          errors: this.state.errors.comcat(err),
+          uploadState: "error",
+          uploadTask: null
+        });
+      });
   };
 
   render() {
-    const { errors, message, modal } = this.state;
+    const { errors, message, modal, percentUploaded, uploadState } = this.state;
     return (
       <Segment className="message__form">
         <Input
@@ -99,12 +169,16 @@ export default class MessageForm extends Component {
             icon="cloud upload"
             onClick={this.openModal}
           />
-          <FileModal
-            uploadFile={this.uploadFile}
-            modal={modal}
-            closeModal={this.closeModal}
-          />
         </Button.Group>
+        <FileModal
+          uploadFile={this.uploadFile}
+          modal={modal}
+          closeModal={this.closeModal}
+        />
+        <ProgressBar
+          percentUploaded={percentUploaded}
+          uploadState={uploadState}
+        />
       </Segment>
     );
   }

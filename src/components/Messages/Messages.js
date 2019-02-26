@@ -32,6 +32,7 @@ class Messages extends Component {
     });
   };
 
+  /* need to be corrected to show no message channel   */
   displayMessages = messages =>
     messages.length > 0 &&
     messages.map(message => (
@@ -44,7 +45,7 @@ class Messages extends Component {
 
   render() {
     const { messagesRef, messages } = this.state;
-    console.log(messages);
+    // console.log(messages);
     return (
       <Fragment>
         <MessageHeader />
