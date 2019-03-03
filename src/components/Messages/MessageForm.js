@@ -47,12 +47,12 @@ export default class MessageForm extends Component {
   };
 
   sendMessage = () => {
-    const { messagesRef, currentChannel } = this.props;
+    const { getMessageRef, currentChannel } = this.props;
     const { message } = this.state;
 
     if (message) {
       this.setState({ loading: true });
-      messagesRef
+      getMessageRef()
         .child(currentChannel.id)
         .push()
         .set(this.createMessage())
@@ -73,10 +73,18 @@ export default class MessageForm extends Component {
     }
   };
 
+  getPath = () => {
+    if (this.props.isPrivateChannel) {
+      return `chat/private-${this.props.currentChannel.id}`;
+    } else {
+      return "chat/public";
+    }
+  };
+
   uploadFile = (file, metadata) => {
     const pathToUpload = this.props.currentChannel.id;
-    const ref = this.props.messagesRef;
-    const filePath = `chat/public/${uuidv4()}.jpg`;
+    const ref = this.props.getMessageRef();
+    const filePath = `${this.getPath()}/${uuidv4()}.jpg`;
     this.setState(
       {
         uploadState: "uploading",
@@ -168,6 +176,7 @@ export default class MessageForm extends Component {
             labelPosition="right"
             icon="cloud upload"
             onClick={this.openModal}
+            disabled={uploadState === "uploading"}
           />
         </Button.Group>
         <FileModal

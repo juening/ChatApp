@@ -6,6 +6,11 @@ body,
   padding: 1em;
 }
 
+/* menu sidepanel./js */
+.menu {
+  padding-bottom: 2em;
+}
+
 /* messages.js */
 .messages {
   height: 440px;
