@@ -23,7 +23,7 @@ class DirectMessages extends Component {
   addListeners = currentUserUid => {
     const loadedUsers = [];
     this.state.usersRef.on("child_added", snap => {
-      console.log("snap value is ", snap);
+      // console.log("snap value is ", snap);
       if (currentUserUid !== snap.key) {
         let user = snap.val();
         user["uid"] = snap.key;
@@ -78,7 +78,6 @@ class DirectMessages extends Component {
   };
 
   setActiveChannel = userId => {
-    console.log(";called");
     this.setState({ activeChannel: userId });
   };
 

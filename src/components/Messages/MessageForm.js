@@ -33,7 +33,7 @@ export default class MessageForm extends Component {
       timestamp: firebase.database.ServerValue.TIMESTAMP,
       user: {
         id: this.props.currentUser.uid,
-        name: this.props.currentUser.name,
+        name: this.props.currentUser.displayName,
         avatar: this.props.currentUser.photoURL
       }
     };
