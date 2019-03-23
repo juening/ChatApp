@@ -23,6 +23,7 @@ class Channels extends Component {
     firstLoad: true,
     activeChannel: "",
     messagesRef: firebase.database().ref("messages"),
+    typingRef: firebase.database().ref("typing"),
     notifications: []
   };
 
@@ -158,6 +159,10 @@ class Channels extends Component {
   openModal = () => this.setState({ modal: true });
 
   changeChannel = channel => {
+    this.state.typingRef
+      .child(this.state.channel.id)
+      .child(this.props.currentUser.uid)
+      .remove();
     this.setActiveChannel(channel);
     this.clearNotifications();
     this.props.setCurrentChannel(channel);
