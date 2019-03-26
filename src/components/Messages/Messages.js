@@ -25,13 +25,20 @@ class Messages extends Component {
     typingUsers: []
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.props.currentChannel !== prevProps.currentChannel) {
       const { currentChannel, currentUser } = this.props;
       this.addChannelListeners(currentChannel.id);
       this.addUserStarListener(currentChannel.id, currentUser.uid);
     }
+    if (this.messagesEndRef) {
+      this.scrollToBottom();
+    }
   }
+
+  scrollToBottom = () => {
+    this.messagesEndRef.scrollIntoView({ behavior: "smooth" });
+  };
 
   addChannelListeners = channelId => {
     this.addMessageListener(channelId);
@@ -260,6 +267,11 @@ class Messages extends Component {
               : this.displayMessages(messages)}
 
             {this.displayTypingUsers(typingUsers)}
+            <div
+              ref={node => {
+                this.messagesEndRef = node;
+              }}
+            />
           </Comment.Group>
         </Segment>
 
